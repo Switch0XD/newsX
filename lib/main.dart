@@ -1,19 +1,20 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'dart:convert';
-
 import 'package:newsx/api_keys.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:convert';
+import 'package:url_launcher/url_launcher_string.dart';
+import 'package:provider/provider.dart';
 
+// to format date
 String formatDate(String dateString) {
   DateTime dateTime = DateTime.parse(dateString);
-
   String formattedDate = DateFormat('dd-MMM-yyyy').format(dateTime);
-
   return formattedDate;
 }
 
+// to remove quotes from link
 String formatLink(String link) {
   if (link.isNotEmpty) {
     return link.substring(0, link.length - 0);
@@ -22,6 +23,7 @@ String formatLink(String link) {
   }
 }
 
+// fetching data from api
 Future<List<dynamic>> fetchData() async {
   final response = await http.get(
     Uri.parse('https://yahoo-finance15.p.rapidapi.com/api/v1/markets/news'),
@@ -39,11 +41,16 @@ Future<List<dynamic>> fetchData() async {
 }
 
 void main() {
-  runApp(const NewsX());
+  runApp(
+    ChangeNotifierProvider<ThemeProvider>(
+      create: (context) => ThemeProvider(),
+      child: const NewsX(),
+    ),
+  );
 }
 
 class NewsX extends StatelessWidget {
-  const NewsX({Key? key}) : super(key: key);
+  const NewsX({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,63 +59,152 @@ class NewsX extends StatelessWidget {
       title: 'NewsX',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
+        brightness: Brightness.light, // Initial brightness is light
       ),
-      home: const NewsList(),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark, // Dark theme configuration
+      ),
+      home: FutureBuilder<List<dynamic>>(
+        future: fetchData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            // Display SplashScreen while fetching data
+            return const SplashScreen();
+          } else if (snapshot.hasError) {
+            // Display error message if data fetching fails
+            return Scaffold(
+              body: Center(
+                child: Text('Error: ${snapshot.error}'),
+              ),
+            );
+          } else {
+            // Data loaded successfully, navigate to NewsList with loaded data
+            return NewsList(data: snapshot.data!);
+          }
+        },
+      ),
     );
   }
 }
 
-class NewsList extends StatelessWidget {
-  const NewsList({super.key});
+// SplashScreen widget to display splash screen
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    return const Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'NewsX',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Stay Informed, Stay Ahead with NewsX',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ThemeProvider class to manage theme mode and night mode
+class ThemeProvider extends ChangeNotifier {
+  ThemeMode _themeMode = ThemeMode.light;
+  bool _isNightModeEnabled = false; // New boolean flag
+
+  ThemeMode get themeMode => _themeMode;
+  bool get isNightModeEnabled =>
+      _isNightModeEnabled; // Getter for night mode flag
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    notifyListeners();
+  }
+
+  void toggleNightMode(bool value) {
+    _isNightModeEnabled = value;
+    notifyListeners();
+  }
+}
+
+// NewsList widget to display list of news
+class NewsList extends StatelessWidget {
+  final List<dynamic> data;
+
+  const NewsList({Key? key, required this.data}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final isNightModeEnabled =
+        Provider.of<ThemeProvider>(context).isNightModeEnabled;
+
     return Scaffold(
       appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 19, 18, 18),
-          title: const Text(
-            'NewsX',
-            style: TextStyle(color: Colors.white),
-          )),
-      body: FutureBuilder<List<dynamic>>(
-        future: fetchData(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return ListView.separated(
-              separatorBuilder: (context, index) {
-                return const Divider();
-              },
-              itemCount: snapshot.data?.length ?? 0,
-              itemBuilder: (context, index) {
-                var item = snapshot.data![index];
-                String date = formatDate(item['pubDate'] ?? 'Not Avaiable');
-
-                dynamic url =
-                    formatLink(item['link'] ?? 'Sorry Link Not Found');
-                print(url);
-                // print(item['pubDate'][0]);
-                return ListTile(
-                    leading: Text(
-                      (index + 1).toString(),
-                    ),
-                    title: Text(
-                      item['title'] ?? 'Title Not Found',
-                      style: const TextStyle(
-                          fontSize: 16.0, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(
-                        'Source ${item['source'] ?? 'not avaiable'}  Publish Date $date'),
-                    onTap: () => {
-                          launchUrl(url),
-                        });
-              },
+        backgroundColor: const Color.fromARGB(255, 19, 18, 18),
+        title: const Text(
+          'NewsX',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.nightlight_round),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false)
+                  .toggleNightMode(
+                      !Provider.of<ThemeProvider>(context, listen: false)
+                          .isNightModeEnabled);
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        color: isNightModeEnabled ? Colors.white : Colors.black,
+        child: ListView.separated(
+          separatorBuilder: (context, index) {
+            return const Divider();
+          },
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            var item = data[index];
+            String date = formatDate(item['pubDate'] ?? 'Not Avaiable');
+            dynamic url = formatLink(item['link'] ?? 'Sorry Link Not Found');
+            return ListTile(
+              leading: Text(
+                (index + 1).toString(),
+              ),
+              title: Text(
+                item['title'] ?? 'Title Not Found',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.bold,
+                  color: isNightModeEnabled ? Colors.black : Colors.white,
+                ),
+              ),
+              subtitle: Text(
+                'Source ${item['source'] ?? 'not avaiable'}  Publish Date $date',
+                style: TextStyle(
+                  color: isNightModeEnabled ? Colors.black : Colors.white,
+                ),
+              ),
+              onTap: () => launchUrlString(url),
             );
-          }
-        },
+          },
+        ),
       ),
     );
   }
