@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:convert';
 
 import 'package:newsx/api_keys.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 String formatDate(String dateString) {
   DateTime dateTime = DateTime.parse(dateString);
@@ -11,6 +12,14 @@ String formatDate(String dateString) {
   String formattedDate = DateFormat('dd-MMM-yyyy').format(dateTime);
 
   return formattedDate;
+}
+
+String formatLink(String link) {
+  if (link.isNotEmpty) {
+    return link.substring(0, link.length - 0);
+  } else {
+    return 'Sorry Link Not Found';
+  }
 }
 
 Future<List<dynamic>> fetchData() async {
@@ -56,8 +65,11 @@ class NewsList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('NewsX'),
-      ),
+          backgroundColor: const Color.fromARGB(255, 19, 18, 18),
+          title: const Text(
+            'NewsX',
+            style: TextStyle(color: Colors.white),
+          )),
       body: FutureBuilder<List<dynamic>>(
         future: fetchData(),
         builder: (context, snapshot) {
@@ -66,15 +78,33 @@ class NewsList extends StatelessWidget {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
-            return ListView.builder(
+            return ListView.separated(
+              separatorBuilder: (context, index) {
+                return const Divider();
+              },
               itemCount: snapshot.data?.length ?? 0,
               itemBuilder: (context, index) {
                 var item = snapshot.data![index];
-                print(item);
+                String date = formatDate(item['pubDate'] ?? 'Not Avaiable');
+
+                dynamic url =
+                    formatLink(item['link'] ?? 'Sorry Link Not Found');
+                print(url);
+                // print(item['pubDate'][0]);
                 return ListTile(
-                  title: Text(item['title']),
-                  subtitle: Text('${item['source']} - ${item['pubDate']}'),
-                );
+                    leading: Text(
+                      (index + 1).toString(),
+                    ),
+                    title: Text(
+                      item['title'] ?? 'Title Not Found',
+                      style: const TextStyle(
+                          fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                        'Source ${item['source'] ?? 'not avaiable'}  Publish Date $date'),
+                    onTap: () => {
+                          launchUrl(url),
+                        });
               },
             );
           }
