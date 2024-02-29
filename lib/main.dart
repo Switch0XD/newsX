@@ -48,7 +48,7 @@ class NewsX extends StatelessWidget {
 }
 
 class NewsList extends StatelessWidget {
-  const NewsList({Key? key}) : super(key: key);
+  const NewsList({super.key});
 
   @override
   Widget build(BuildContext context) {
