@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
+import 'package:newsx/api_keys.dart';
+
 String formatDate(String dateString) {
   DateTime dateTime = DateTime.parse(dateString);
 
@@ -15,7 +17,7 @@ Future<List<dynamic>> fetchData() async {
   final response = await http.get(
     Uri.parse('https://yahoo-finance15.p.rapidapi.com/api/v1/markets/news'),
     headers: {
-      'X-RapidAPI-Key': 'd8bb4a67f4mshb612732666c9775p17563djsne55c967f7a8b',
+      'X-RapidAPI-Key': apiKey,
       'X-RapidAPI-Host': 'yahoo-finance15.p.rapidapi.com'
     },
   );
