@@ -146,7 +146,7 @@ class ThemeProvider extends ChangeNotifier {
 class NewsList extends StatelessWidget {
   final List<dynamic> data;
 
-  const NewsList({Key? key, required this.data}) : super(key: key);
+  const NewsList({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
