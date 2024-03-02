@@ -172,12 +172,16 @@ class NewsList extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.nightlight_round),
+            icon: Icon(
+              Icons.nightlight_round,
+              color: isNightModeEnabled ? Colors.white : Colors.lightBlue,
+            ),
             onPressed: () {
               Provider.of<ThemeProvider>(context, listen: false)
                   .toggleNightMode(
-                      !Provider.of<ThemeProvider>(context, listen: false)
-                          .isNightModeEnabled);
+                !Provider.of<ThemeProvider>(context, listen: false)
+                    .isNightModeEnabled,
+              );
             },
           ),
         ],
@@ -191,35 +195,57 @@ class NewsList extends StatelessWidget {
           itemCount: data.length,
           itemBuilder: (context, index) {
             var item = data[index];
-            String date = formatDate(item['pubDate'] ?? 'Not Avaiable');
+            String date = formatDate(item['pubDate'] ?? 'Not Available');
             dynamic url = formatLink(item['link'] ?? 'Sorry Link Not Found');
-            return ListTile(
-              leading: Text(
-                (index + 1).toString(),
+            return Card(
+              elevation: 5,
+              color: isNightModeEnabled ? Colors.white : Colors.grey[850],
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
               ),
-              title: Text(
-                item['title'] ?? 'Title Not Found',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: isNightModeEnabled ? Colors.black : Colors.white,
+              child: ListTile(
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                leading: const Icon(Icons.article_outlined,
+                    color: Colors.deepPurple),
+                title: Text(
+                  item['title'] ?? 'Title Not Found',
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                    color: isNightModeEnabled ? Colors.black : Colors.white,
+                  ),
                 ),
-              ),
-              subtitle: Text(
-                'Source ${item['source'] ?? 'not avaiable'}  Publish Date $date',
-                style: TextStyle(
-                  color: isNightModeEnabled ? Colors.black : Colors.white,
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Source: ${item['source'] ?? 'Not Available'}',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: isNightModeEnabled ? Colors.black : Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Published Date: $date',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: isNightModeEnabled ? Colors.black : Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
+                trailing: IconButton(
+                  icon: const Icon(Icons.share, color: Color(0xFF673ab7)),
+                  onPressed: () {
+                    Share.share(
+                      'Check out this news: ${item['title']} $url',
+                    );
+                  },
+                ),
+                onTap: () => launchUrlString(url),
               ),
-              trailing: IconButton(
-                icon: const Icon(Icons.share),
-                onPressed: () {
-                  Share.share(
-                    'Check out this news: ${item['title']} $url',
-                  );
-                },
-              ),
-              onTap: () => launchUrlString(url),
             );
           },
         ),
