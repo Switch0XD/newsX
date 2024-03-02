@@ -6,6 +6,7 @@ import 'package:newsx/api_keys.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:provider/provider.dart';
+import 'package:share/share.dart';
 
 // to format date
 String formatDate(String dateString) {
@@ -156,9 +157,18 @@ class NewsList extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 19, 18, 18),
-        title: const Text(
-          'NewsX',
-          style: TextStyle(color: Colors.white),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'NewsX',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Stay Informed, Stay Ahead',
+              style: TextStyle(color: Colors.white, fontSize: 12),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -200,6 +210,14 @@ class NewsList extends StatelessWidget {
                 style: TextStyle(
                   color: isNightModeEnabled ? Colors.black : Colors.white,
                 ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.share),
+                onPressed: () {
+                  Share.share(
+                    'Check out this news: ${item['title']} $url',
+                  );
+                },
               ),
               onTap: () => launchUrlString(url),
             );
