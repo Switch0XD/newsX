@@ -1,4 +1,4 @@
-## NewsX
+![image](https://github.com/Switch0XD/newsX/assets/43660918/03cca00a-132e-4182-88c1-586cce2d7735)## NewsX
 
 NewsX is a Flutter application that fetches news data from an API and displays it in a user-friendly interface. Users can stay informed and ahead with the latest news articles conveniently presented on their mobile devices.
 
@@ -11,8 +11,13 @@ NewsX is a Flutter application that fetches news data from an API and displays i
 
 ### Screenshots
 
-![Screenshot 1](screenshot1.png)
-![Screenshot 2](screenshot2.png)
+![Screenshot 1]![image](https://github.com/Switch0XD/newsX/assets/43660918/09c012e9-981b-4ed0-9dd7-aecee7e7ae7c)
+
+![Screenshot 2]![image](https://github.com/Switch0XD/newsX/assets/43660918/9cf033cf-5b9e-4080-a0e3-3c328616bf0c)
+![Screenshot 3]!![image](https://github.com/Switch0XD/newsX/assets/43660918/07940dbf-e311-4024-8d90-fde482ca2fb2)
+
+
+
 
 ### How to Use
 
