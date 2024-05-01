@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:newsx/api_keys.dart';
+import 'package:newsx/api_key.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:provider/provider.dart';
